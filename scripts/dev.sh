@@ -209,7 +209,7 @@ fi
 
 if [[ "$SKIP_MIGRATE" -eq 0 ]]; then
   echo "${C_YELLOW}▸${C_RESET} Миграции Payload (apps/cms)..."
-  (cd "$ROOT_DIR" && pnpm payload migrate)
+  (cd "$ROOT_DIR" && CI=true pnpm payload migrate)
   print_status "✓" "Миграции выполнены"
 else
   echo "${C_YELLOW}▸${C_RESET} Миграции пропущены (--no-migrate)"
