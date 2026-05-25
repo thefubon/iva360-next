@@ -1,0 +1,144 @@
+# IVA360 — GitLab CI/CD (self-hosted deploy, no Vercel / foreign PaaS)
+#
+# Required CI/CD variables (Settings → CI/CD → Variables):
+#   POSTGRES_PASSWORD, PAYLOAD_SECRET, S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY
+# Optional: DATABASE_URL (defaults composed in deploy), DEPLOY_PATH on runner host
+#
+# Runners:
+#   - Shared/docker runners for quality + build (Docker-in-Docker)
+#   - Self-hosted runner with tag `deploy` for production compose up
+
+stages:
+  - prepare
+  - quality
+  - build
+  - deploy
+
+variables:
+  PNPM_VERSION: '10.12.1'
+  NODE_VERSION: '22'
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: '/certs'
+  FF_NETWORK_PER_BUILD: 'true'
+
+.default_node:
+  image: node:${NODE_VERSION}-alpine
+  before_script:
+    - corepack enable pnpm
+    - pnpm config set store-dir .pnpm-store
+  cache:
+    key:
+      files:
+        - pnpm-lock.yaml
+    paths:
+      - .pnpm-store
+
+prepare:install:
+  extends: .default_node
+  stage: prepare
+  script:
+    - pnpm install --frozen-lockfile
+  artifacts:
+    paths:
+      - node_modules/
+      - apps/web/node_modules/
+      - apps/cms/node_modules/
+      - packages/shared/node_modules/
+    expire_in: 1 hour
+
+quality:lint:
+  extends: .default_node
+  stage: quality
+  needs: [prepare:install]
+  script:
+    - pnpm lint
+
+quality:typecheck:
+  extends: .default_node
+  stage: quality
+  needs: [prepare:install]
+  script:
+    - pnpm typecheck
+
+quality:test:
+  extends: .default_node
+  stage: quality
+  needs: [prepare:install]
+  script:
+    - pnpm test:int
+
+types:check:
+  extends: .default_node
+  stage: quality
+  needs: [prepare:install]
+  script:
+    - pnpm types:check
+
+quality:audit:
+  extends: .default_node
+  stage: quality
+  needs: [prepare:install]
+  script:
+    - pnpm audit --audit-level=high
+  allow_failure: true
+
+.docker_build:
+  stage: build
+  image: docker:24-cli
+  services:
+    - docker:24-dind
+  needs:
+    - quality:lint
+    - quality:typecheck
+    - quality:test
+    - types:check
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_TAG
+
+build:web:
+  extends: .docker_build
+  script:
+    - docker build -f apps/web/Dockerfile -t "$CI_REGISTRY_IMAGE/web:$CI_COMMIT_SHA" -t "$CI_REGISTRY_IMAGE/web:latest" .
+    - docker push "$CI_REGISTRY_IMAGE/web:$CI_COMMIT_SHA"
+    - docker push "$CI_REGISTRY_IMAGE/web:latest"
+
+build:cms:
+  extends: .docker_build
+  script:
+    - docker build -f apps/cms/Dockerfile -t "$CI_REGISTRY_IMAGE/cms:$CI_COMMIT_SHA" -t "$CI_REGISTRY_IMAGE/cms:latest" .
+    - docker push "$CI_REGISTRY_IMAGE/cms:$CI_COMMIT_SHA"
+    - docker push "$CI_REGISTRY_IMAGE/cms:latest"
+
+.deploy_template:
+  stage: deploy
+  tags:
+    - deploy
+  image: docker:24-cli
+  needs:
+    - build:web
+    - build:cms
+  variables:
+    IMAGE_TAG: $CI_COMMIT_SHA
+    CMS_INTERNAL_URL: http://cms:3333
+    DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-iva360}
+    S3_ENDPOINT: http://minio:9000
+  script:
+    - cd "${DEPLOY_PATH:-/opt/iva360}"
+    - export CI_REGISTRY_IMAGE IMAGE_TAG
+    - docker compose -f docker-compose.prod.yml pull web cms
+    - docker compose -f docker-compose.prod.yml up -d postgres minio
+    - docker compose -f docker-compose.prod.yml up --no-deps minio-init
+    - docker compose -f docker-compose.prod.yml up -d cms web
+    - docker compose --profile with-nginx -f docker-compose.prod.yml up -d nginx || true
+  environment:
+    name: production
+  when: manual
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_TAG
+
+deploy:production:
+  extends: .deploy_template

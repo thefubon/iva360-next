@@ -1,8 +1,8 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
-/.pnp
+node_modules/
+.pnp
 .pnp.js
 .yarn/install-state.gz
 
@@ -13,7 +13,7 @@
 /coverage
 
 # next.js
-/.next/
+**/.next/
 /out/
 
 # production
@@ -31,20 +31,29 @@ yarn-error.log*
 # local env files
 .env*.local
 
-# vercel
+# Legacy: Vercel CLI metadata (not used — app deploys via GitLab + Docker on own servers)
 .vercel
 
 # typescript
 *.tsbuildinfo
-next-env.d.ts
+**/next-env.d.ts
 
 .env
 
 /media
 
 # Playwright
-node_modules/
 /test-results/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+.playwright/
+
+# turbo
+.turbo/
+
+# pnpm (CI cache)
+.pnpm-store/
+
+# vite / vitest temp
+**/.vite-temp/

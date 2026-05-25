@@ -1,67 +1,72 @@
-# Payload Blank Template
+# IVA360
 
-This template comes configured with the bare minimum to get started on anything you need.
+Монорепозиторий: `apps/web` (Next.js, :3000), `apps/cms` (Payload CMS, :3333), `packages/shared` (типы + Zod).
 
-## Quick start
+Self-hosted деплой в РФ через GitLab CI/CD и Docker.
 
-This template can be deployed directly from our Cloud hosting and it will setup MongoDB and cloud S3 object storage for media.
+## Структура
 
-## Quick Start - local setup
+```
+iva360-next/
+├── apps/web/
+├── apps/cms/
+├── packages/shared/
+├── docker-compose.yml
+├── docker-compose.prod.yml
+├── .gitlab-ci.yml
+└── scripts/dev.sh
+```
 
-To spin up this template locally, follow these steps:
+## Локально
 
-### Clone
+```bash
+cp .env.example .env   # PAYLOAD_SECRET, POSTGRES_PASSWORD (= DATABASE_URL)
+pnpm install && pnpm dev
+```
 
-After you click the `Deploy` button above, you'll want to have standalone copy of this repo on your machine. If you've already cloned this repo, skip to [Development](#development).
+- Web: http://localhost:3000
+- Admin: http://localhost:3000/admin (rewrite → CMS :3333)
+- MinIO console: http://localhost:9001
 
-### Development
+| Команда | Описание |
+|---------|----------|
+| `pnpm dev` | Docker + migrate + CMS + Web |
+| `pnpm dev:web` / `pnpm dev:cms` | Один сервис |
+| `pnpm build` | Сборка web и cms |
+| `pnpm test:gate` | lint, typecheck, test, build, audit |
+| `pnpm types:check` | payload-types diff с git |
 
-1. First [clone the repo](#clone) if you have not done so already
-2. `cd my-project && cp .env.example .env` to copy the example environment variables. You'll need to add the `MONGODB_URL` from your Cloud project to your `.env` if you want to use S3 storage and the MongoDB database that was created for you.
+Переменные окружения — `.env.example`.
 
-3. `pnpm install && pnpm dev` to install dependencies and start the dev server
-4. open `http://localhost:3000` to open the app in your browser
+## Продакшен
 
-That's it! Changes made in `./src` will be reflected in your app. Follow the on-screen instructions to login and create your first admin user. Then check out [Production](#production) once you're ready to build and serve your app, and [Deployment](#deployment) when you're ready to go live.
+```bash
+export CI_REGISTRY_IMAGE=registry.gitlab.example.com/group/iva360
+export IMAGE_TAG=latest
+docker compose -f docker-compose.prod.yml pull
+docker compose -f docker-compose.prod.yml up -d
+```
 
-#### Docker (Optional)
+GitLab CI: **quality** → **build** (образы web/cms) → **deploy** (runner с тегом `deploy`).
 
-If you prefer to use Docker for local development instead of a local MongoDB instance, the provided docker-compose.yml file can be used.
+Сервисы: `web:3000`, `cms:3333`, `postgres`, `minio`, опционально `nginx`.
 
-To do so, follow these steps:
+- Один домен: nginx → web; Next.js rewrites `/admin`, `/api` на CMS
+- Поддомены: `iva360.ru` → web, `cms.iva360.ru` → cms (`CMS_PUBLIC_URL`)
 
-- Modify the `MONGODB_URL` in your `.env` file to `mongodb://127.0.0.1/<dbname>`
-- Modify the `docker-compose.yml` file's `MONGODB_URL` to match the above `<dbname>`
-- Run `docker-compose up` to start the database, optionally pass `-d` to run in the background.
+Миграции:
 
-## How it works
+```bash
+docker compose -f docker-compose.prod.yml run --rm cms \
+  node node_modules/payload/bin.js migrate
+```
 
-The Payload config is tailored specifically to the needs of most websites. It is pre-configured in the following ways:
+CI variables: `POSTGRES_PASSWORD`, `PAYLOAD_SECRET`, `S3_*`.
 
-### Collections
+## UI Kit (shadcn)
 
-See the [Collections](https://payloadcms.com/docs/configuration/collections) docs for details on how to extend this functionality.
+`apps/web/components.json` → `@iva360`: сейчас `uikit-iva360-react.vercel.app` (CDN для `shadcn add`), цель — `uikit.iwa360.ru`. Запуск из `apps/web`: `pnpm dlx shadcn@latest add …`.
 
-- #### Users (Authentication)
+## @iva360/shared
 
-  Users are auth-enabled collections that have access to the admin panel.
-
-  For additional help, see the official [Auth Example](https://github.com/payloadcms/payload/tree/3.x/examples/auth) or the [Authentication](https://payloadcms.com/docs/authentication/overview#authentication-overview) docs.
-
-- #### Media
-
-  This is the uploads enabled collection. It features pre-configured sizes, focal point and manual resizing to help you manage your pictures.
-
-### Docker
-
-Alternatively, you can use [Docker](https://www.docker.com) to spin up this template locally. To do so, follow these steps:
-
-1. Follow [steps 1 and 2 from above](#development), the docker-compose file will automatically use the `.env` file in your project root
-1. Next run `docker-compose up`
-1. Follow [steps 4 and 5 from above](#development) to login and create your first admin user
-
-That's it! The Docker instance will help you get up and running quickly while also standardizing the development environment across your teams.
-
-## Questions
-
-If you have any issues or questions, reach out to us on [Discord](https://discord.com/invite/payload) or start a [GitHub discussion](https://github.com/payloadcms/payload/discussions).
+Типы Payload и Zod-схемы. См. [packages/shared/README.md](packages/shared/README.md).
