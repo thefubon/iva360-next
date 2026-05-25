@@ -1,10 +1,8 @@
 'use client'
 
 import { HugeiconsIcon, type IconSvgElement } from '@hugeicons/react'
-import {
-  HUGEICONS_FREE_ICON_NAMES,
-  TOPBAR_PHONE_HUGEICONS_DEFAULTS,
-} from '@iva360/shared/schemas'
+import { HUGEICONS_ALLOWLIST, isHugeiconsAllowlistName } from '@iva360/shared/schemas'
+import { hugeiconsRegistry } from '@/lib/hugeicons-registry'
 import {
   FieldDescription,
   FieldError,
@@ -17,10 +15,8 @@ import {
   withCondition,
 } from '@payloadcms/ui'
 import type { TextFieldClientComponent } from 'payload'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { components as selectComponents, type OptionProps, type SingleValueProps } from 'react-select'
-
-const MAX_VISIBLE_OPTIONS = 50
 
 type IconsRegistry = Record<string, IconSvgElement>
 type SelectOption = ReactSelectOption<string>
@@ -31,43 +27,24 @@ const optionRowStyle: React.CSSProperties = {
   gap: '0.5rem',
 }
 
-function filterIconNames(search: string, selectedValue?: string | null): string[] {
+function filterIconNames(
+  allowlist: readonly string[],
+  search: string,
+  selectedValue?: string | null,
+): string[] {
   const query = search.trim().toLowerCase()
 
   if (!query) {
-    const defaults = TOPBAR_PHONE_HUGEICONS_DEFAULTS.slice(0, MAX_VISIBLE_OPTIONS)
-    if (defaults.length >= MAX_VISIBLE_OPTIONS) {
-      return defaults
-    }
-
-    const defaultsSet = new Set<string>(defaults)
-    const filler = HUGEICONS_FREE_ICON_NAMES.filter((name) => !defaultsSet.has(name))
-    return [...defaults, ...filler].slice(0, MAX_VISIBLE_OPTIONS)
+    return [...allowlist]
   }
 
-  const matches: string[] = []
+  const matches = allowlist.filter((name) => name.toLowerCase().includes(query))
 
-  for (const name of HUGEICONS_FREE_ICON_NAMES) {
-    if (name.toLowerCase().includes(query)) {
-      matches.push(name)
-      if (matches.length >= MAX_VISIBLE_OPTIONS) {
-        break
-      }
-    }
+  if (selectedValue && !matches.includes(selectedValue) && selectedValue.toLowerCase().includes(query)) {
+    return [selectedValue, ...matches.filter((name) => name !== selectedValue)]
   }
 
-  if (
-    selectedValue &&
-    !matches.includes(selectedValue) &&
-    selectedValue.toLowerCase().includes(query)
-  ) {
-    return [selectedValue, ...matches.filter((name) => name !== selectedValue)].slice(
-      0,
-      MAX_VISIBLE_OPTIONS,
-    )
-  }
-
-  return matches
+  return [...matches]
 }
 
 function IconPreview({
@@ -75,7 +52,7 @@ function IconPreview({
   name,
   size = 18,
 }: {
-  iconsRegistry: IconsRegistry | null
+  iconsRegistry: IconsRegistry
   name: string
   size?: number
 }) {
@@ -91,10 +68,6 @@ function IconPreview({
     />
   )
 
-  if (!iconsRegistry) {
-    return placeholder
-  }
-
   const icon = iconsRegistry[name]
   if (!icon) {
     return placeholder
@@ -103,7 +76,7 @@ function IconPreview({
   return <HugeiconsIcon icon={icon} size={size} strokeWidth={1.75} />
 }
 
-function createSelectComponents(iconsRegistry: IconsRegistry | null) {
+function createSelectComponents(iconsRegistry: IconsRegistry) {
   const IconOption = (optionProps: OptionProps<SelectOption>) => (
     <selectComponents.Option {...optionProps}>
       <span style={optionRowStyle}>
@@ -167,43 +140,36 @@ const HugeiconsPickerComponent: TextFieldClientComponent = (props) => {
 
   const [search, setSearch] = useState('')
   const [menuIsOpen, setMenuIsOpen] = useState(false)
-  const [iconsRegistry, setIconsRegistry] = useState<IconsRegistry | null>(null)
 
   const selectedValue = typeof value === 'string' ? value : null
-  const shouldLoadIcons = menuIsOpen || Boolean(selectedValue)
-  const iconsLoading = shouldLoadIcons && !iconsRegistry
 
-  useEffect(() => {
-    if (iconsRegistry || !shouldLoadIcons) {
-      return
+  const effectiveSearch = useMemo(() => {
+    const trimmed = search.trim()
+
+    if (!trimmed) {
+      return ''
     }
 
-    let cancelled = false
-
-    void import('@hugeicons/core-free-icons')
-      .then((module) => {
-        if (!cancelled) {
-          setIconsRegistry(module as IconsRegistry)
-        }
-      })
-
-    return () => {
-      cancelled = true
+    if (selectedValue && trimmed.toLowerCase() === selectedValue.toLowerCase()) {
+      return ''
     }
-  }, [shouldLoadIcons, iconsRegistry])
+
+    return search
+  }, [search, selectedValue])
 
   const visibleNames = useMemo(() => {
-    const names = filterIconNames(search, selectedValue)
+    if (!effectiveSearch.trim()) {
+      const allowlist = [...HUGEICONS_ALLOWLIST]
 
-    if (selectedValue && !search.trim() && !names.includes(selectedValue)) {
-      return [selectedValue, ...names.filter((name) => name !== selectedValue)].slice(
-        0,
-        MAX_VISIBLE_OPTIONS,
-      )
+      if (selectedValue && !isHugeiconsAllowlistName(selectedValue)) {
+        return [selectedValue, ...allowlist]
+      }
+
+      return allowlist
     }
 
-    return names
-  }, [search, selectedValue])
+    return filterIconNames(HUGEICONS_ALLOWLIST, effectiveSearch, selectedValue)
+  }, [effectiveSearch, selectedValue])
 
   const options = useMemo(
     () => visibleNames.map((name) => ({ label: name, value: name })),
@@ -219,8 +185,8 @@ const HugeiconsPickerComponent: TextFieldClientComponent = (props) => {
   }, [selectedValue])
 
   const selectComponentsWithIcons = useMemo(
-    () => createSelectComponents(iconsRegistry),
-    [iconsRegistry],
+    () => createSelectComponents(hugeiconsRegistry),
+    [],
   )
 
   const onChange = useCallback(
@@ -236,11 +202,9 @@ const HugeiconsPickerComponent: TextFieldClientComponent = (props) => {
   )
 
   const searchHint =
-    search.trim().length === 0
-      ? `Показаны ${visibleNames.length} из ${HUGEICONS_FREE_ICON_NAMES.length}. Введите название для поиска.`
-      : visibleNames.length >= MAX_VISIBLE_OPTIONS
-        ? `Показаны первые ${MAX_VISIBLE_OPTIONS} совпадений. Уточните запрос.`
-        : undefined
+    menuIsOpen && effectiveSearch.trim().length === 0
+      ? `Доступно ${HUGEICONS_ALLOWLIST.length} иконок. Введите название для поиска.`
+      : undefined
 
   return (
     <div
@@ -271,12 +235,11 @@ const HugeiconsPickerComponent: TextFieldClientComponent = (props) => {
           disabled={disabled || readOnly}
           filterOption={() => true}
           isClearable={false}
-          isLoading={iconsLoading}
           isSearchable
           menuIsOpen={menuIsOpen}
           noOptionsMessage={() =>
-            search.trim()
-              ? 'Ничего не найдено. Попробуйте другой запрос.'
+            effectiveSearch.trim()
+              ? 'Ничего не найдено. Добавьте иконку в allowlist топбара.'
               : 'Начните вводить название иконки…'
           }
           onChange={onChange}
@@ -289,12 +252,13 @@ const HugeiconsPickerComponent: TextFieldClientComponent = (props) => {
           }}
           onMenuOpen={() => {
             setMenuIsOpen(true)
+            setSearch('')
           }}
           options={options}
           placeholder="Выберите иконку…"
           value={selectedOption}
         />
-        {searchHint && menuIsOpen && (
+        {searchHint && (
           <p
             style={{
               color: 'var(--theme-elevation-500)',

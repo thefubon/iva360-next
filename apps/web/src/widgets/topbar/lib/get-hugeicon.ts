@@ -1,11 +1,24 @@
 import type { IconSvgElement } from '@hugeicons/react'
+import {
+  BookOpen02Icon,
+  Call02Icon,
+  CustomerSupportIcon,
+  AtIcon,
+  Search01Icon,
+} from '@hugeicons/core-free-icons'
+import { isHugeiconsAllowlistName } from '@iva360/shared/schemas'
 
-import * as Hugeicons from '@hugeicons/core-free-icons'
-
-const iconsRegistry = Hugeicons as Record<string, IconSvgElement>
+/** Static map of allowlisted topbar icons — keep in sync with `HUGEICONS_ALLOWLIST`. */
+const iconsRegistry = {
+  Call02Icon,
+  CustomerSupportIcon,
+  BookOpen02Icon,
+  AtIcon,
+  Search01Icon,
+} satisfies Record<string, IconSvgElement>
 
 export function getHugeicon(name: string | null | undefined): IconSvgElement | undefined {
-  if (!name) {
+  if (!name || !isHugeiconsAllowlistName(name)) {
     return undefined
   }
 

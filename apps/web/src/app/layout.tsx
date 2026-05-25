@@ -1,7 +1,7 @@
 import { defaultLocale } from '@iva360/shared/i18n'
 import { headers } from 'next/headers'
 
-import { LOCALE_HEADER } from '@/i18n/constants'
+import { LOCALE_HEADER } from '@/shared/lib/i18n/constants'
 
 import './assets/css/globals.css'
 

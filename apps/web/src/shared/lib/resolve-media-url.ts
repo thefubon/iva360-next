@@ -1,9 +1,6 @@
-import type { TopbarLinkInput } from '@iva360/shared'
+type MediaLike = { url?: string | null } | number | null | undefined
 
-export function resolveMediaUrl(
-  media: TopbarLinkInput['customIcon'],
-  cmsBaseUrl: string,
-): string | null {
+export function resolveMediaUrl(media: MediaLike, cmsBaseUrl: string): string | null {
   if (!media || typeof media === 'number') {
     return null
   }

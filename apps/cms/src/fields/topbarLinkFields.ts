@@ -38,7 +38,7 @@ export const topbarLinkItemFields: Field[] = [
     name: 'hugeiconsName',
     type: 'text',
     label: 'Иконка Hugeicons',
-    defaultValue: 'CallIcon',
+    defaultValue: 'Call02Icon',
     admin: {
       description:
         'Выберите иконку из бесплатного набора Hugeicons. Используйте поиск по названию.',
@@ -63,11 +63,26 @@ export const topbarLinkItemFields: Field[] = [
 type TopbarLinkArrayFieldOptions = {
   name: string
   description?: string
+  defaultHugeiconsName?: string
+}
+
+function createTopbarLinkItemFields(defaultHugeiconsName: string): Field[] {
+  return topbarLinkItemFields.map((field) => {
+    if (field.type === 'text' && field.name === 'hugeiconsName') {
+      return {
+        ...field,
+        defaultValue: defaultHugeiconsName,
+      }
+    }
+
+    return field
+  })
 }
 
 export function createTopbarLinkArrayField({
   name,
   description,
+  defaultHugeiconsName = 'Call02Icon',
 }: TopbarLinkArrayFieldOptions): ArrayField {
   return {
     name,
@@ -84,6 +99,6 @@ export function createTopbarLinkArrayField({
         RowLabel: './components/admin/fields/LinkRowLabel#LinkRowLabel',
       },
     },
-    fields: topbarLinkItemFields,
+    fields: createTopbarLinkItemFields(defaultHugeiconsName),
   }
 }

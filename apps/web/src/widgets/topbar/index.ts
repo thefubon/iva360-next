@@ -1,2 +1,2 @@
-export { Topbar } from './ui/topbar'
-export { fetchTopbar, fetchHeader, fetchFooter } from './api/fetch-topbar'
+export { Topbar } from './topbar'
+export { fetchTopbar, fetchFooter } from './api/fetch-topbar'

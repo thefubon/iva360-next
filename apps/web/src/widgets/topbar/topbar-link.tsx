@@ -1,26 +1,18 @@
 import type { TopbarLinkInput } from '@iva360/shared'
 import { HugeiconsIcon } from '@hugeicons/react'
 
+import { resolveMediaUrl } from '@/shared/lib/resolve-media-url'
 import { cn } from '@/shared/lib/utils'
 
-import { getHugeicon } from '../lib/get-hugeicon'
-import { resolveMediaUrl } from '../lib/resolve-media-url'
-
-const linkClassName =
-  'inline-flex items-center gap-1.5 transition-colors hover:text-primary'
+import { topbarLinkClassName } from './lib/constants'
+import { getHugeicon } from './lib/get-hugeicon'
 
 type TopbarLinkProps = {
   link: TopbarLinkInput
   cmsBaseUrl: string
 }
 
-function TopbarLinkIcon({
-  link,
-  cmsBaseUrl,
-}: {
-  link: TopbarLinkInput
-  cmsBaseUrl: string
-}) {
+function TopbarLinkIcon({ link, cmsBaseUrl }: { link: TopbarLinkInput; cmsBaseUrl: string }) {
   const iconType = link.iconType ?? 'hugeicons'
 
   if (iconType === 'none') {
@@ -39,18 +31,13 @@ function TopbarLinkIcon({
     )
   }
 
-  const icon = getHugeicon(link.hugeiconsName ?? 'CallIcon')
+  const icon = getHugeicon(link.hugeiconsName ?? 'Call02Icon')
   if (!icon) {
     return null
   }
 
   return (
-    <HugeiconsIcon
-      icon={icon}
-      size={16}
-      className="size-4 shrink-0 text-current"
-      aria-hidden
-    />
+    <HugeiconsIcon icon={icon} size={16} className="size-4 shrink-0 text-current" aria-hidden />
   )
 }
 
@@ -64,7 +51,7 @@ export function TopbarLink({ link, cmsBaseUrl }: TopbarLinkProps) {
   )
 
   if (!href) {
-    return <span className={linkClassName}>{content}</span>
+    return <span className={topbarLinkClassName}>{content}</span>
   }
 
   const external = link.openInNewTab === true
@@ -72,10 +59,8 @@ export function TopbarLink({ link, cmsBaseUrl }: TopbarLinkProps) {
   return (
     <a
       href={href}
-      className={cn(linkClassName)}
-      {...(external
-        ? { target: '_blank', rel: 'noopener noreferrer' }
-        : undefined)}
+      className={cn(topbarLinkClassName)}
+      {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : undefined)}
     >
       {content}
     </a>

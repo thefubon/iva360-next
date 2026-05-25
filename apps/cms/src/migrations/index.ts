@@ -1,3 +1,4 @@
+import * as migration_20260525_160000_topbar_email_icon_at from './20260525_160000_topbar_email_icon_at';
 import * as migration_20260525_151539_topbar_social_to_right_links from './20260525_151539_topbar_social_to_right_links';
 import * as migration_20260525_152707_localization_ru_en from './20260525_152707_localization_ru_en';
 
@@ -11,5 +12,10 @@ export const migrations = [
     up: migration_20260525_152707_localization_ru_en.up,
     down: migration_20260525_152707_localization_ru_en.down,
     name: '20260525_152707_localization_ru_en'
+  },
+  {
+    up: migration_20260525_160000_topbar_email_icon_at.up,
+    down: migration_20260525_160000_topbar_email_icon_at.down,
+    name: '20260525_160000_topbar_email_icon_at',
   },
 ];

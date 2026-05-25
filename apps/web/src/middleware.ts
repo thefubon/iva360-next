@@ -2,13 +2,11 @@ import { defaultLocale } from '@iva360/shared/i18n'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-import { LOCALE_HEADER } from '@/i18n/constants'
+import { LOCALE_HEADER } from '@/shared/lib/i18n/constants'
 
 function shouldSkipLocaleRouting(pathname: string): boolean {
   return (
-    pathname.startsWith('/admin') ||
-    pathname.startsWith('/api') ||
-    pathname.startsWith('/_next')
+    pathname.startsWith('/admin') || pathname.startsWith('/api') || pathname.startsWith('/_next')
   )
 }
 

@@ -1,9 +1,10 @@
 import React from 'react'
 
 import { isAppLocale, resolveLocaleParam } from '@iva360/shared/i18n'
+import { Header } from '@/widgets/header'
 import { Topbar } from '@/widgets/topbar'
 
-import { Providers } from '../../providers'
+import { Providers } from '@/app/providers'
 
 export function generateStaticParams() {
   return [{ locale: 'ru' }, { locale: 'en' }]
@@ -20,6 +21,7 @@ export default async function FrontendLayout(props: {
   return (
     <Providers>
       <Topbar locale={locale} />
+      <Header locale={locale} />
       <main className="flex-1">{children}</main>
     </Providers>
   )

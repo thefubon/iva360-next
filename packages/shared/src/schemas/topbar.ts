@@ -1,29 +1,36 @@
 import { z } from 'zod'
 
-import { hugeiconsFreeIconNameSchema } from './hugeicons'
+import { HUGEICONS_ALLOWLIST } from './hugeicons-allowlist'
+import { hugeiconsStoredNameSchema } from './hugeicons'
 import { mediaSchema } from './media'
 
-/** Рекомендуемые иконки для ссылок топбара — показываются первыми в пикере. */
-export const TOPBAR_PHONE_HUGEICONS = [
-  { value: 'CallIcon', label: 'CallIcon' },
-  { value: 'Call02Icon', label: 'Call02Icon' },
-  { value: 'CallIncoming01Icon', label: 'CallIncoming01Icon' },
-  { value: 'CallRinging01Icon', label: 'CallRinging01Icon' },
-  { value: 'TelephoneIcon', label: 'TelephoneIcon' },
-  { value: 'SmartPhone01Icon', label: 'SmartPhone01Icon' },
-  { value: 'SmartPhone02Icon', label: 'SmartPhone02Icon' },
-  { value: 'ContactBookIcon', label: 'ContactBookIcon' },
-  { value: 'AiPhone01Icon', label: 'AiPhone01Icon' },
-  { value: 'PhoneOff01Icon', label: 'PhoneOff01Icon' },
-] as const
+/** Иконки топбара для CMS-пикера (phones + rightLinks). */
+export const TOPBAR_HUGEICONS = HUGEICONS_ALLOWLIST.map((value) => ({
+  value,
+  label: value,
+})) as ReadonlyArray<{
+  value: (typeof HUGEICONS_ALLOWLIST)[number]
+  label: string
+}>
 
-export const TOPBAR_PHONE_HUGEICONS_DEFAULTS = TOPBAR_PHONE_HUGEICONS.map(
-  (option) => option.value,
-)
+export const TOPBAR_HUGEICONS_DEFAULTS = TOPBAR_HUGEICONS.map((option) => option.value)
+
+/** @deprecated Use `TOPBAR_HUGEICONS` */
+export const TOPBAR_PHONE_HUGEICONS = TOPBAR_HUGEICONS
+
+/** @deprecated Use `TOPBAR_HUGEICONS_DEFAULTS` */
+export const TOPBAR_PHONE_HUGEICONS_DEFAULTS = TOPBAR_HUGEICONS_DEFAULTS
+
+/** @deprecated Use `TOPBAR_HUGEICONS` */
+export const TOPBAR_RIGHT_HUGEICONS = TOPBAR_HUGEICONS
+
+/** @deprecated Use `TOPBAR_HUGEICONS_DEFAULTS` */
+export const TOPBAR_RIGHT_HUGEICONS_DEFAULTS = TOPBAR_HUGEICONS_DEFAULTS
 
 export const topbarPhoneIconTypeSchema = z.enum(['none', 'hugeicons', 'custom'])
 
-export const topbarPhoneHugeiconsNameSchema = hugeiconsFreeIconNameSchema
+/** Stored CMS values may use any icon name; allowlist applies only to the CMS picker. */
+export const topbarPhoneHugeiconsNameSchema = hugeiconsStoredNameSchema
 
 export const topbarLinkSchema = z.object({
   id: z.string().optional(),

@@ -1,18 +1,11 @@
-import type { AppLocale, TopbarLinkInput } from '@iva360/shared'
+import type { AppLocale } from '@iva360/shared'
 
-import { fetchTopbar } from '../api/fetch-topbar'
+import { getCmsInternalUrl } from '@/shared/lib/cms-url'
+
+import { fetchTopbar } from './api/fetch-topbar'
+import { getTopbarLinks } from './lib/get-topbar-links'
 import { TopbarLink } from './topbar-link'
 import { TopbarRightNav } from './topbar-right-nav'
-
-function getTopbarLinks(
-  items: TopbarLinkInput[] | null | undefined,
-): TopbarLinkInput[] {
-  if (!items?.length) {
-    return []
-  }
-
-  return items.filter((item) => item.number.trim().length > 0)
-}
 
 type TopbarProps = {
   locale: AppLocale
@@ -22,7 +15,7 @@ export async function Topbar({ locale }: TopbarProps) {
   const topbar = await fetchTopbar(locale)
   const phones = getTopbarLinks(topbar?.phones)
   const rightLinks = getTopbarLinks(topbar?.rightLinks)
-  const cmsBaseUrl = process.env.CMS_INTERNAL_URL ?? 'http://localhost:3333'
+  const cmsBaseUrl = getCmsInternalUrl()
 
   return (
     <div className="hidden border-b border-border bg-background lg:block">
@@ -39,7 +32,7 @@ export async function Topbar({ locale }: TopbarProps) {
             : null}
         </div>
         <div className="flex shrink-0 items-center gap-4 xl:gap-6">
-          <TopbarRightNav links={rightLinks} cmsBaseUrl={cmsBaseUrl} />
+          <TopbarRightNav links={rightLinks} cmsBaseUrl={cmsBaseUrl} locale={locale} />
         </div>
       </div>
     </div>

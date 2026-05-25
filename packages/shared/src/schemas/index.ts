@@ -34,6 +34,11 @@ export {
 } from './footer'
 
 export {
+  HUGEICONS_ALLOWLIST,
+  hugeiconsAllowlistNameSchema,
+  hugeiconsStoredNameSchema,
+  isHugeiconsAllowlistName,
+  type HugeiconsAllowlistName,
   HUGEICONS_FREE_ICON_NAMES,
   hugeiconsFreeIconNameSchema,
   isHugeiconsFreeIconName,
@@ -41,8 +46,12 @@ export {
 } from './hugeicons'
 
 export {
+  TOPBAR_HUGEICONS,
+  TOPBAR_HUGEICONS_DEFAULTS,
   TOPBAR_PHONE_HUGEICONS,
   TOPBAR_PHONE_HUGEICONS_DEFAULTS,
+  TOPBAR_RIGHT_HUGEICONS,
+  TOPBAR_RIGHT_HUGEICONS_DEFAULTS,
   topbarPhoneIconTypeSchema,
   topbarPhoneHugeiconsNameSchema,
   topbarLinkSchema,

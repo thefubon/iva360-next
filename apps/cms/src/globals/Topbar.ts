@@ -29,6 +29,7 @@ export const Topbar: GlobalConfig = {
           fields: [
             createTopbarLinkArrayField({
               name: 'rightLinks',
+              defaultHugeiconsName: 'CustomerSupportIcon',
               description:
                 'Список ссылок с подписями и иконками (tel:, mailto:, https: и т.д.).',
             }),
