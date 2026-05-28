@@ -21,7 +21,8 @@
     "paths": {
       "@/*": ["./src/*"],
       "@iva360/shared": ["../../packages/shared/src/index.ts"],
-      "@iva360/shared/*": ["../../packages/shared/src/*"]
+      "@iva360/shared/*": ["../../packages/shared/src/*"],
+      "@iva360/ui/*": ["../../packages/ui/src/*"]
     },
     "target": "ES2022"
   },

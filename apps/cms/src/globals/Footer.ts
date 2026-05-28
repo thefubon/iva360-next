@@ -1,13 +1,16 @@
 import type { GlobalConfig } from 'payload'
 
 import { globalEditorAccess } from '../access/globals'
+import { createGlobalLivePreviewConfig, globalVersionsConfig } from '../lib/live-preview'
 
 export const Footer: GlobalConfig = {
   slug: 'footer',
   label: 'Подвал',
   admin: {
-    group: 'Глобальные настройки',
+    group: 'Основные',
+    livePreview: createGlobalLivePreviewConfig(),
   },
+  versions: globalVersionsConfig,
   access: globalEditorAccess,
   fields: [
     {
@@ -72,7 +75,7 @@ export const Footer: GlobalConfig = {
         {
           name: 'email',
           type: 'email',
-          label: 'Email',
+          label: 'Эл. почта',
         },
         {
           name: 'phone',

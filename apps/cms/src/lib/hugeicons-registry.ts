@@ -4,6 +4,7 @@ import {
   Call02Icon,
   CustomerSupportIcon,
   AtIcon,
+  Home01Icon,
   Search01Icon,
 } from '@hugeicons/core-free-icons'
 import type { HugeiconsAllowlistName } from '@iva360/shared/schemas'
@@ -15,4 +16,5 @@ export const hugeiconsRegistry: Record<HugeiconsAllowlistName, IconSvgElement> =
   BookOpen02Icon,
   AtIcon,
   Search01Icon,
+  Home01Icon,
 }

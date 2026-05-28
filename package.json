@@ -18,6 +18,8 @@
     "generate:types": "pnpm --filter @iva360/cms generate:types",
     "generate:importmap": "pnpm --filter @iva360/cms generate:importmap",
     "payload": "pnpm --filter @iva360/cms payload",
+    "payload:migrate": "bash scripts/payload-migrate-yes.sh",
+    "payload:clear-dev-push": "bash scripts/payload-clear-dev-push-marker.sh",
     "test:gate": "node scripts/run.mjs test",
     "test:gate:quick": "node scripts/run.mjs test --quick",
     "test": "pnpm run test:int && pnpm run test:e2e",

@@ -1,0 +1,55 @@
+/* Guaruja Neue metric overrides for consistent heading line-height. */
+@font-face {
+  font-family: 'GuarujaNeueFixed';
+  src: url('/fonts/GuarujaNeue/GuarujaNeue-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  ascent-override: 82%;
+  descent-override: 18%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'GuarujaNeueFixed';
+  src: url('/fonts/GuarujaNeue/GuarujaNeue-Medium.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  ascent-override: 82%;
+  descent-override: 18%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'GuarujaNeueFixed';
+  src: url('/fonts/GuarujaNeue/GuarujaNeue-SemiBold.woff') format('woff');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+  ascent-override: 82%;
+  descent-override: 18%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'GuarujaNeueFixed';
+  src: url('/fonts/GuarujaNeue/GuarujaNeue-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  ascent-override: 82%;
+  descent-override: 18%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'GuarujaNeueFixed';
+  src: url('/fonts/GuarujaNeue/GuarujaNeue-Black.woff') format('woff');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+  ascent-override: 82%;
+  descent-override: 18%;
+  line-gap-override: 0%;
+}

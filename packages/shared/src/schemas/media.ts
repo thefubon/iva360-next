@@ -2,7 +2,8 @@ import { z } from 'zod'
 
 export const mediaSchema = z.object({
   id: z.number(),
-  alt: z.string().min(1),
+  /** May be absent when populated relations omit empty localized values. */
+  alt: z.string().nullable().optional(),
   updatedAt: z.string(),
   createdAt: z.string(),
   url: z.string().nullable().optional(),

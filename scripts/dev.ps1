@@ -180,7 +180,14 @@ try {
     Write-Color '▸ Миграции Payload (apps/cms)...' Yellow
     Push-Location $RootDir
     try {
-      pnpm payload migrate
+      # Clears batch -1 dev-push marker, then runs migrations (see pnpm payload:migrate).
+      if (Get-Command bash -ErrorAction SilentlyContinue) {
+        bash "$RootDir/scripts/payload-migrate-yes.sh"
+      } else {
+        $env:CI = 'true'
+        $env:PAYLOAD_MIGRATING = 'true'
+        'y' | pnpm payload migrate
+      }
       if ($LASTEXITCODE -ne 0) { throw 'migrate failed' }
     } finally {
       Pop-Location

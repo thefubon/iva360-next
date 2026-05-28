@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     media: Media;
     users: User;
+    search: Search;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -78,6 +79,7 @@ export interface Config {
   collectionsSelect: {
     media: MediaSelect<false> | MediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    search: SearchSelect<false> | SearchSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -88,14 +90,16 @@ export interface Config {
   };
   fallbackLocale: ('false' | 'none' | 'null') | false | null | ('ru' | 'en') | ('ru' | 'en')[];
   globals: {
-    topbar: Topbar;
     header: Header;
+    homePage: HomePage;
     footer: Footer;
+    brand: Brand;
   };
   globalsSelect: {
-    topbar: TopbarSelect<false> | TopbarSelect<true>;
     header: HeaderSelect<false> | HeaderSelect<true>;
+    homePage: HomePageSelect<false> | HomePageSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
+    brand: BrandSelect<false> | BrandSelect<true>;
   };
   locale: 'ru' | 'en';
   widgets: {
@@ -132,7 +136,7 @@ export interface UserAuthOperations {
 export interface Media {
   id: number;
   /**
-   * Краткое описание изображения для доступности и SEO.
+   * Краткое описание изображения для доступности и поисковой оптимизации.
    */
   alt: string;
   updatedAt: string;
@@ -173,6 +177,25 @@ export interface User {
   collection: 'users';
 }
 /**
+ * Автоматически созданные результаты для поиска в админке. Откройте «Поиск» в боковом меню и используйте строку поиска над списком — она ищет по заголовку. Записи обновляются при сохранении глобальных настроек и пользователей; после обновления CMS выполняется полная переиндексация.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "search".
+ */
+export interface Search {
+  id: number;
+  title?: string | null;
+  priority?: number | null;
+  doc?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  globalSlug?: string | null;
+  globalFieldKey?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -203,6 +226,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'users';
         value: number | User;
+      } | null)
+    | ({
+        relationTo: 'search';
+        value: number | Search;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -288,6 +315,19 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "search_select".
+ */
+export interface SearchSelect<T extends boolean = true> {
+  title?: T;
+  priority?: T;
+  doc?: T;
+  globalSlug?: T;
+  globalFieldKey?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -328,10 +368,53 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "topbar".
+ * via the `definition` "header".
  */
-export interface Topbar {
+export interface Header {
   id: number;
+  logo?: (number | null) | Media;
+  siteName?: string | null;
+  /**
+   * Основное меню шапки сайта. Добавляйте пункты с названием и ссылкой; иконку можно показывать в меню или только на мобильных. Подпункты превращают пункт в мега-меню — URL верхнего уровня тогда необязателен.
+   */
+  navigation?:
+    | {
+        /**
+         * SVG отображается встроенным на сайте; PNG/WebP — как изображение.
+         */
+        icon?: (number | null) | Media;
+        /**
+         * Если включено, иконка показывается только в мобильном меню, не в десктопной навигации.
+         */
+        mobileMenuOnly?: boolean | null;
+        label: string;
+        /**
+         * Необязательно, если добавлено подменю.
+         */
+        url?: string | null;
+        openInNewTab?: boolean | null;
+        /**
+         * Если добавлены подпункты, пункт отображается как мега-меню.
+         */
+        subItems?:
+          | {
+              /**
+               * SVG отображается встроенным на сайте; PNG/WebP — как изображение.
+               */
+              icon?: (number | null) | Media;
+              label: string;
+              url: string;
+              openInNewTab?: boolean | null;
+              /**
+               * Можно использовать &nbsp; для неразрывного пробела.
+               */
+              description?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
   /**
    * Список ссылок с подписями и иконками (tel:, mailto:, https: и т.д.).
    */
@@ -378,24 +461,256 @@ export interface Topbar {
         id?: string | null;
       }[]
     | null;
+  _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "header".
+ * via the `definition` "homePage".
  */
-export interface Header {
+export interface HomePage {
   id: number;
-  logo?: (number | null) | Media;
-  siteName?: string | null;
-  navigation?:
-    | {
-        label: string;
-        url: string;
-        id?: string | null;
-      }[]
+  /**
+   * Резервный заголовок для метаданных и H1, если блок Hero не задан.
+   */
+  title?: string | null;
+  /**
+   * Заголовок для поисковых систем и вкладки браузера.
+   */
+  metaTitle?: string | null;
+  /**
+   * Краткое описание страницы для поисковых систем.
+   */
+  metaDescription?: string | null;
+  /**
+   * Изображение для предпросмотра в соцсетях. Рекомендуемый размер: 1200×630 px.
+   */
+  ogImage?: (number | null) | Media;
+  /**
+   * Если включено, страница не будет индексироваться (noindex).
+   */
+  noIndex?: boolean | null;
+  blocks?:
+    | (
+        | {
+            /**
+             * Текст заголовка Hero-блока на сайте.
+             */
+            headlineSection: {
+              /**
+               * Можно использовать &nbsp; для неразрывного пробела между словами.
+               */
+              headline: string;
+            };
+            /**
+             * Необязательное изображение справа от текста на сайте.
+             */
+            imageSection?: {
+              image?: (number | null) | Media;
+            };
+            /**
+             * Необязательные бейджи под заголовком (магазины приложений, сервисы и т.п.).
+             */
+            subscriptionsSection?: {
+              badges?:
+                | {
+                    /**
+                     * Выберите иконку из библиотеки бренда (Настройки → Бренд → Иконки).
+                     */
+                    image?: (number | null) | Media;
+                    label?: string | null;
+                    /**
+                     * Относительный (/about) или абсолютный (https://…) URL.
+                     */
+                    url?: string | null;
+                    /**
+                     * Выберите фон из библиотеки бренда (Настройки → Бренд → Фон).
+                     */
+                    backgroundColor?: string | null;
+                    /**
+                     * Выберите цвет из библиотеки бренда (Настройки → Бренд → Цвет).
+                     */
+                    textColor?: string | null;
+                    openInNewTab?: boolean | null;
+                    id?: string | null;
+                  }[]
+                | null;
+            };
+            /**
+             * Необязательные кнопки призыва к действию под бейджами. Максимум 2.
+             */
+            buttonsSection?: {
+              buttons?:
+                | {
+                    label?: string | null;
+                    /**
+                     * Относительный (/about) или абсолютный (https://…) URL.
+                     */
+                    url?: string | null;
+                    variant?: ('primary' | 'secondary' | 'outline' | 'white' | 'green') | null;
+                    openInNewTab?: boolean | null;
+                    id?: string | null;
+                  }[]
+                | null;
+            };
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hero';
+          }
+        | {
+            text: string;
+            /**
+             * Вертикальный отступ над заголовком на десктопе (px). По умолчанию — 24 px.
+             */
+            spacingTop?: number | null;
+            /**
+             * Вертикальный отступ под заголовком на десктопе (px). По умолчанию — 24 px.
+             */
+            spacingBottom?: number | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'headingH2';
+          }
+        | {
+            icon?: (number | null) | Media;
+            title: string;
+            /**
+             * Отображает бейдж «beta» рядом с заголовком на сайте.
+             */
+            showBetaBadge?: boolean | null;
+            /**
+             * Можно использовать &nbsp; для неразрывного пробела.
+             */
+            description?: string | null;
+            /**
+             * Картинка блока и её расположение относительно текста.
+             */
+            imageSection?: {
+              image?: (number | null) | Media;
+              /**
+               * На сайте применяется скругление rounded-md у картинки.
+               */
+              roundedImage?: boolean | null;
+              position?: ('right' | 'left') | null;
+            };
+            /**
+             * Необязательная кнопка под описанием.
+             */
+            buttonSection?: {
+              label?: string | null;
+              /**
+               * Относительный (/about) или абсолютный (https://…) URL.
+               */
+              url?: string | null;
+              variant?: ('primary' | 'secondary' | 'outline' | 'white' | 'green') | null;
+              openInNewTab?: boolean | null;
+            };
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'featureSection';
+          }
+        | {
+            /**
+             * Количество карточек в ряд на широких экранах.
+             */
+            columns?: ('1' | '2' | '3' | '4') | null;
+            items?:
+              | {
+                  title: string;
+                  /**
+                   * Можно использовать &nbsp; для неразрывного пробела.
+                   */
+                  description?: string | null;
+                  /**
+                   * Горизонтальное выравнивание текста и вертикальное положение блока контента в карточке.
+                   */
+                  content?: {
+                    /**
+                     * Горизонтальное выравнивание заголовка, описания и кнопки.
+                     */
+                    align?: ('left' | 'center') | null;
+                    /**
+                     * Вертикальное положение блока контента внутри карточки.
+                     */
+                    position?: ('top' | 'center') | null;
+                  };
+                  /**
+                   * Медиа карточки: иконка над заголовком или картинка слева, справа, сверху или под контентом.
+                   */
+                  img?: {
+                    /**
+                     * Без картинки — только текст. Иконка — медиа над заголовком. Картинка — расположение задаётся полем ниже.
+                     */
+                    mediaType?: ('none' | 'icon' | 'image') | null;
+                    /**
+                     * Иконка или картинка в зависимости от выбранного типа медиа.
+                     */
+                    image?: (number | null) | Media;
+                    /**
+                     * Где показывать картинку относительно текста: слева/справа (на планшете «слева» — сверху, «справа» — снизу) или сверху/снизу на всех экранах.
+                     */
+                    position?: ('left' | 'right' | 'top' | 'bottom') | null;
+                    /**
+                     * Только для расположения «Слева» или «Справа»: вертикальное выравнивание картинки внутри колонки.
+                     */
+                    imageAlign?: ('top' | 'bottom' | 'stretch') | null;
+                    /**
+                     * На сайте применяется скругление rounded-md у картинки.
+                     */
+                    rounded?: boolean | null;
+                  };
+                  /**
+                   * Ссылка в карточке: отдельная кнопка или клик по всей карточке (нужен URL).
+                   */
+                  btn?: {
+                    /**
+                     * «Без кнопки» — карточка без ссылки. «Кнопка в карточке» — ссылка в виде кнопки. «Вся карточка» — переход по клику на карточку.
+                     */
+                    linkMode?: ('none' | 'button' | 'card') | null;
+                    label?: string | null;
+                    /**
+                     * Относительный (/about) или абсолютный (https://…) URL.
+                     */
+                    url?: string | null;
+                    variant?: ('primary' | 'secondary' | 'outline' | 'white' | 'green') | null;
+                    openInNewTab?: boolean | null;
+                  };
+                  /**
+                   * Базовый — стандартный фон сайта. Брендовый — пресет из «Настройки → Бренд → Фон». Свой — произвольный цвет.
+                   */
+                  backgroundMode?: ('default' | 'brand' | 'custom') | null;
+                  /**
+                   * Пресет из библиотеки бренда (Настройки → Бренд → Фон).
+                   */
+                  brandBackgroundId?: string | null;
+                  /**
+                   * Произвольный цвет фона карточки в формате #RRGGBB.
+                   */
+                  backgroundColor?: string | null;
+                  /**
+                   * На сайте карточка занимает указанное число колонок сетки (col-span). На мобильных устройствах карточки всегда на всю ширину.
+                   */
+                  gridSpan?: ('1' | '2' | 'full') | null;
+                  /**
+                   * Внутренние отступы карточки. По умолчанию включены со всех сторон (p-6 / lg:p-12).
+                   */
+                  padding?: {
+                    paddingLeft?: boolean | null;
+                    paddingTop?: boolean | null;
+                    paddingRight?: boolean | null;
+                    paddingBottom?: boolean | null;
+                  };
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'cardsGrid';
+          }
+      )[]
     | null;
+  _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -428,14 +743,88 @@ export interface Footer {
     phone?: string | null;
     address?: string | null;
   };
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * Библиотека логотипов, иконок, фонов и цветов для выбора в других разделах CMS.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "brand".
+ */
+export interface Brand {
+  id: number;
+  /**
+   * Логотипы из этого списка доступны в полях выбора логотипа бренда.
+   */
+  logos?:
+    | {
+        name: string;
+        image: number | Media;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Иконки из этого списка доступны в полях выбора иконки бренда.
+   */
+  icons?:
+    | {
+        name: string;
+        image: number | Media;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Фоны из этого списка доступны в полях выбора фона бренда.
+   */
+  backgrounds?:
+    | {
+        name: string;
+        color: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Цвета из этого списка доступны в полях выбора цвета бренда.
+   */
+  colors?:
+    | {
+        name: string;
+        value: string;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "topbar_select".
+ * via the `definition` "header_select".
  */
-export interface TopbarSelect<T extends boolean = true> {
+export interface HeaderSelect<T extends boolean = true> {
+  logo?: T;
+  siteName?: T;
+  navigation?:
+    | T
+    | {
+        icon?: T;
+        mobileMenuOnly?: T;
+        label?: T;
+        url?: T;
+        openInNewTab?: T;
+        subItems?:
+          | T
+          | {
+              icon?: T;
+              label?: T;
+              url?: T;
+              openInNewTab?: T;
+              description?: T;
+              id?: T;
+            };
+        id?: T;
+      };
   phones?:
     | T
     | {
@@ -458,24 +847,154 @@ export interface TopbarSelect<T extends boolean = true> {
         customIcon?: T;
         id?: T;
       };
+  _status?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "header_select".
+ * via the `definition` "homePage_select".
  */
-export interface HeaderSelect<T extends boolean = true> {
-  logo?: T;
-  siteName?: T;
-  navigation?:
+export interface HomePageSelect<T extends boolean = true> {
+  title?: T;
+  metaTitle?: T;
+  metaDescription?: T;
+  ogImage?: T;
+  noIndex?: T;
+  blocks?:
     | T
     | {
-        label?: T;
-        url?: T;
-        id?: T;
+        hero?:
+          | T
+          | {
+              headlineSection?:
+                | T
+                | {
+                    headline?: T;
+                  };
+              imageSection?:
+                | T
+                | {
+                    image?: T;
+                  };
+              subscriptionsSection?:
+                | T
+                | {
+                    badges?:
+                      | T
+                      | {
+                          image?: T;
+                          label?: T;
+                          url?: T;
+                          backgroundColor?: T;
+                          textColor?: T;
+                          openInNewTab?: T;
+                          id?: T;
+                        };
+                  };
+              buttonsSection?:
+                | T
+                | {
+                    buttons?:
+                      | T
+                      | {
+                          label?: T;
+                          url?: T;
+                          variant?: T;
+                          openInNewTab?: T;
+                          id?: T;
+                        };
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        headingH2?:
+          | T
+          | {
+              text?: T;
+              spacingTop?: T;
+              spacingBottom?: T;
+              id?: T;
+              blockName?: T;
+            };
+        featureSection?:
+          | T
+          | {
+              icon?: T;
+              title?: T;
+              showBetaBadge?: T;
+              description?: T;
+              imageSection?:
+                | T
+                | {
+                    image?: T;
+                    roundedImage?: T;
+                    position?: T;
+                  };
+              buttonSection?:
+                | T
+                | {
+                    label?: T;
+                    url?: T;
+                    variant?: T;
+                    openInNewTab?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        cardsGrid?:
+          | T
+          | {
+              columns?: T;
+              items?:
+                | T
+                | {
+                    title?: T;
+                    description?: T;
+                    content?:
+                      | T
+                      | {
+                          align?: T;
+                          position?: T;
+                        };
+                    img?:
+                      | T
+                      | {
+                          mediaType?: T;
+                          image?: T;
+                          position?: T;
+                          imageAlign?: T;
+                          rounded?: T;
+                        };
+                    btn?:
+                      | T
+                      | {
+                          linkMode?: T;
+                          label?: T;
+                          url?: T;
+                          variant?: T;
+                          openInNewTab?: T;
+                        };
+                    backgroundMode?: T;
+                    brandBackgroundId?: T;
+                    backgroundColor?: T;
+                    gridSpan?: T;
+                    padding?:
+                      | T
+                      | {
+                          paddingLeft?: T;
+                          paddingTop?: T;
+                          paddingRight?: T;
+                          paddingBottom?: T;
+                        };
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
       };
+  _status?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -506,6 +1025,44 @@ export interface FooterSelect<T extends boolean = true> {
         email?: T;
         phone?: T;
         address?: T;
+      };
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "brand_select".
+ */
+export interface BrandSelect<T extends boolean = true> {
+  logos?:
+    | T
+    | {
+        name?: T;
+        image?: T;
+        id?: T;
+      };
+  icons?:
+    | T
+    | {
+        name?: T;
+        image?: T;
+        id?: T;
+      };
+  backgrounds?:
+    | T
+    | {
+        name?: T;
+        color?: T;
+        id?: T;
+      };
+  colors?:
+    | T
+    | {
+        name?: T;
+        value?: T;
+        id?: T;
       };
   updatedAt?: T;
   createdAt?: T;

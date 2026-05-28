@@ -1,0 +1,38 @@
+@import 'tailwindcss';
+
+/* Scan UI components and consuming apps (Tailwind v4 monorepo pattern). */
+@source '../**/*.{ts,tsx}';
+@source '../../../../apps/web/src/**/*.{ts,tsx}';
+
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+@custom-variant dark (&:is(.dark *));
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground text-sm leading-snug antialiased md:text-base md:leading-normal;
+  }
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+  html {
+    @apply font-sans;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
+  }
+}
+
+@utility container {
+  @apply mx-auto w-full max-w-[1536px] px-4 sm:px-6 lg:px-8;
+}

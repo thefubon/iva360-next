@@ -59,7 +59,7 @@ export async function CollectionCards(props: WidgetServerProps) {
     <div style={{ display: 'flex', width: '100%' }}>
       <div style={wrapStyle}>
         {!navGroups || navGroups.length === 0 ? (
-          <p>no nav groups....</p>
+          <p>Нет доступных разделов.</p>
         ) : (
           navGroups.map(({ entities, label }, groupIndex) => (
             <div key={groupIndex} style={groupStyle}>

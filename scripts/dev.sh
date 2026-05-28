@@ -209,7 +209,8 @@ fi
 
 if [[ "$SKIP_MIGRATE" -eq 0 ]]; then
   echo "${C_YELLOW}▸${C_RESET} Миграции Payload (apps/cms)..."
-  (cd "$ROOT_DIR" && CI=true pnpm payload migrate)
+  # Clears batch -1 dev-push marker, then runs migrations (see pnpm payload:migrate).
+  "$SCRIPT_DIR/payload-migrate-yes.sh"
   print_status "✓" "Миграции выполнены"
 else
   echo "${C_YELLOW}▸${C_RESET} Миграции пропущены (--no-migrate)"

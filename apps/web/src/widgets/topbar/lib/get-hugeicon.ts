@@ -4,6 +4,7 @@ import {
   Call02Icon,
   CustomerSupportIcon,
   AtIcon,
+  Home01Icon,
   Search01Icon,
 } from '@hugeicons/core-free-icons'
 import { isHugeiconsAllowlistName } from '@iva360/shared/schemas'
@@ -15,6 +16,7 @@ const iconsRegistry = {
   BookOpen02Icon,
   AtIcon,
   Search01Icon,
+  Home01Icon,
 } satisfies Record<string, IconSvgElement>
 
 export function getHugeicon(name: string | null | undefined): IconSvgElement | undefined {

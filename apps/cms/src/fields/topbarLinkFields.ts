@@ -62,6 +62,7 @@ export const topbarLinkItemFields: Field[] = [
 
 type TopbarLinkArrayFieldOptions = {
   name: string
+  label: string
   description?: string
   defaultHugeiconsName?: string
 }
@@ -81,13 +82,14 @@ function createTopbarLinkItemFields(defaultHugeiconsName: string): Field[] {
 
 export function createTopbarLinkArrayField({
   name,
+  label,
   description,
   defaultHugeiconsName = 'Call02Icon',
 }: TopbarLinkArrayFieldOptions): ArrayField {
   return {
     name,
     type: 'array',
-    label: 'Ссылки',
+    label,
     labels: {
       singular: 'Ссылка',
       plural: 'Ссылки',

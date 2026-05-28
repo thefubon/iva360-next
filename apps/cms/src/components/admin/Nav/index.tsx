@@ -2,6 +2,7 @@ import { DefaultNavClient, NavHamburger, NavWrapper } from '@payloadcms/next/cli
 import { Logo } from '@payloadcms/next/rsc'
 import { SettingsMenuButton } from './SettingsMenuButton'
 import { OpenSiteButton } from './OpenSiteButton'
+import { ThemeToggleButton } from './ThemeToggleButton'
 import { Logout } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import type { EntityToGroup } from '@payloadcms/ui/shared'
@@ -9,7 +10,7 @@ import { EntityType, groupNavItems } from '@payloadcms/ui/shared'
 import type { PayloadRequest, ServerProps } from 'payload'
 import React from 'react'
 
-import { sortNavGroups } from '../../../admin/navGroupOrder'
+import { prepareSidebarNavGroups } from '../../../admin/navGroupOrder'
 import { getWebPublicUrl } from '../../../lib/webPublicUrl'
 import { getNavPrefs } from './getNavPrefs'
 
@@ -67,7 +68,7 @@ export const AdminNav: React.FC<NavProps> = async (props) => {
       ),
   ]
 
-  const groups = sortNavGroups(groupNavItems(entities, permissions, i18n))
+  const groups = prepareSidebarNavGroups(groupNavItems(entities, permissions, i18n))
   const navPreferences = req ? await getNavPrefs(req) : null
 
   const LogoutComponent = RenderServerComponent({
@@ -224,6 +225,7 @@ export const AdminNav: React.FC<NavProps> = async (props) => {
             />
           </div>
           <div style={{ flex: '1 1 auto' }} />
+          <ThemeToggleButton />
           <OpenSiteButton href={getWebPublicUrl()} />
           <NavHamburger baseClass={baseClass} />
         </div>

@@ -128,9 +128,12 @@
   --color-rooms-secondary: var(--rooms-secondary);
   --color-rooms-border: var(--rooms-border);
   --color-rooms-text: var(--rooms-text);
-  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+  
+  /* Fonts */
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     'Helvetica Neue', Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
     'Noto Color Emoji';
+  --font-heading: 'GuarujaNeueFixed', 'Guaruja Neue', var(--font-sans);
 }
 
 :root {

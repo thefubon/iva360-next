@@ -1,5 +1,5 @@
 /**
- * Curated allowlist of Hugeicons names available in CMS (topbar links) and web topbar.
+ * Curated allowlist of Hugeicons names available in CMS (topbar, hero) and web.
  *
  * Add icons here only when needed — do not regenerate the full 5000+ icon catalog.
  *
@@ -7,7 +7,7 @@
  * 1. Confirm the export name exists in `@hugeicons/core-free-icons`.
  * 2. Append the name to `HUGEICONS_ALLOWLIST` below.
  * 3. Add a static import + map entry in:
- *    - `apps/web/src/widgets/topbar/lib/get-hugeicon.ts`
+ *    - `apps/web/src/widgets/topbar/lib/get-hugeicon.ts` (topbar + hero)
  *    - `apps/cms/src/lib/hugeicons-registry.ts`
  */
 
@@ -18,6 +18,7 @@ export const HUGEICONS_ALLOWLIST = [
   'BookOpen02Icon',
   'AtIcon',
   'Search01Icon',
+  'Home01Icon',
 ] as const
 
 export type HugeiconsAllowlistName = (typeof HUGEICONS_ALLOWLIST)[number]

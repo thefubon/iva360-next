@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev --port 3000",
+    "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev --port 3000 --hostname localhost --webpack",
     "build": "cross-env NODE_OPTIONS=\"--no-deprecation --max-old-space-size=8000\" next build",
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start --port 3000",
     "typecheck": "tsc --noEmit",
@@ -17,6 +17,8 @@
     "@hugeicons/core-free-icons": "^1.0.17",
     "@hugeicons/react": "^1.0.5",
     "@iva360/shared": "workspace:*",
+    "@iva360/ui": "workspace:*",
+    "@payloadcms/live-preview-react": "3.84.1",
     "@tailwindcss/postcss": "^4.3.0",
     "@tailwindcss/typography": "^0.5.19",
     "class-variance-authority": "^0.7.1",

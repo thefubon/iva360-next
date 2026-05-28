@@ -46,9 +46,16 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  transpilePackages: ['@iva360/shared'],
+  transpilePackages: ['@iva360/shared', '@iva360/ui'],
   turbopack: {
     root: path.resolve(dirname, '../..'),
+    // PostCSS cannot resolve package subpath @import; alias matches @iva360/ui package export.
+    resolveAlias: {
+      '@iva360/ui/globals.css': path.resolve(
+        dirname,
+        '../../packages/ui/src/styles/globals.css',
+      ),
+    },
   },
 }
 

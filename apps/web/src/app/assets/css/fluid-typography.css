@@ -1,0 +1,47 @@
+/*
+ * Fluid typography — clamp(min, preferred, max).
+ * Max = original desktop/largest breakpoint size (never exceeded).
+ * Scales down on narrow viewports and/or @container width (cqi on cards/body).
+ */
+
+@theme inline {
+  /* Hero h1: was text-3xl → sm:text-4xl → md:text-5xl → xl:text-[56px] */
+  --text-fluid-h1: clamp(1.875rem, 1rem + 3vw, 3.5rem);
+
+  /* Feature h2: was text-3xl → md:text-4xl → lg:text-5xl */
+  --text-fluid-h2: clamp(1.875rem, 1.25rem + 1.5vw, 3rem);
+
+  /* Heading h2 block: was text-2xl → md:text-3xl → xl:text-4xl */
+  --text-fluid-h2-section: clamp(1.5rem, 1rem + 1.75vw, 2.25rem);
+
+  /* Card h3: desktop text-4xl; cqi tuned for ~280px text columns (not full card width) */
+  --text-fluid-h3: clamp(1.125rem, 0.35rem + 10.6cqi, 2.25rem);
+
+  /* Descriptions: was text-sm → lg:text-[20px]; cqi matches text-column container width */
+  --text-fluid-body: clamp(0.875rem, min(0.75rem + 0.35vw, 0.4rem + 4.8cqi), 1.25rem);
+}
+
+@utility text-fluid-h1 {
+  font-size: var(--text-fluid-h1);
+  line-height: 1.1;
+}
+
+@utility text-fluid-h2 {
+  font-size: var(--text-fluid-h2);
+  line-height: 1.25;
+}
+
+@utility text-fluid-h2-section {
+  font-size: var(--text-fluid-h2-section);
+  line-height: 1.25;
+}
+
+@utility text-fluid-h3 {
+  font-size: var(--text-fluid-h3);
+  line-height: 1;
+}
+
+@utility text-fluid-body {
+  font-size: var(--text-fluid-body);
+  line-height: clamp(1.25rem, min(1.15rem + 0.25vw, 0.9rem + 3.8cqi), 2rem);
+}

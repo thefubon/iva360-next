@@ -1,13 +1,18 @@
 import type { GlobalConfig } from 'payload'
 
 import { globalEditorAccess } from '../access/globals'
+import { createHeaderNavigationField } from '../fields/headerNavigationFields'
+import { createTopbarLinkArrayField } from '../fields/topbarLinkFields'
+import { createGlobalLivePreviewConfig, globalVersionsConfig } from '../lib/live-preview'
 
 export const Header: GlobalConfig = {
   slug: 'header',
   label: 'Шапка',
   admin: {
-    group: 'Глобальные настройки',
+    group: 'Основные',
+    livePreview: createGlobalLivePreviewConfig(),
   },
+  versions: globalVersionsConfig,
   access: globalEditorAccess,
   fields: [
     {
@@ -32,27 +37,24 @@ export const Header: GlobalConfig = {
         },
         {
           label: 'Навигация',
+          fields: [createHeaderNavigationField()],
+        },
+        {
+          label: 'Топбар',
           fields: [
-            {
-              name: 'navigation',
-              type: 'array',
-              label: 'Навигация',
-              fields: [
-                {
-                  name: 'label',
-                  type: 'text',
-                  label: 'Название',
-                  required: true,
-                  localized: true,
-                },
-                {
-                  name: 'url',
-                  type: 'text',
-                  label: 'Ссылка',
-                  required: true,
-                },
-              ],
-            },
+            createTopbarLinkArrayField({
+              name: 'phones',
+              label: 'Слева',
+              description:
+                'Список ссылок с подписями и иконками (tel:, mailto:, https: и т.д.).',
+            }),
+            createTopbarLinkArrayField({
+              name: 'rightLinks',
+              label: 'Справа',
+              defaultHugeiconsName: 'CustomerSupportIcon',
+              description:
+                'Список ссылок с подписями и иконками (tel:, mailto:, https: и т.д.).',
+            }),
           ],
         },
       ],
